@@ -1,0 +1,6 @@
+{
+  "name": "BilardoGo - Bilardo Oyuncuları ve Salonları Platformu",
+  "description": "Bilardo oyuncularını, salonlarını ve ekosistemini buluşturan sosyal ve sportif platform; masa durumu, maç eşleşme, canlı skor, turnuva ve salon içi sipariş sistemi.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
