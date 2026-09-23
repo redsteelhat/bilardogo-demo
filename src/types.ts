@@ -27,6 +27,8 @@ export interface User {
   currentSalonId?: string;
   etaMinutes?: number; // "Gelecek" için tahmini varış dakikası
   matchStatus: MatchSeekStatus;
+  friends?: string[];
+  blockedUsers?: string[];
   stats: {
     totalMatches: number;
     wins: number;
@@ -118,6 +120,8 @@ export interface Salon {
   status?: SalonStatus;
   amenities: string[];
   announcements: SalonAnnouncement[];
+  lat?: number;
+  lng?: number;
 }
 
 export interface MatchRequest {
@@ -171,6 +175,33 @@ export interface HeadToHeadRecord {
   lastPlayedDate: string;
 }
 
+export interface SoloPracticeRecord {
+  id: string;
+  userId: string;
+  gameType: '3_BANT' | 'KARAMBOL';
+  points: number;
+  innings: number;
+  average: number;
+  highestRun: number;
+  date: string;
+  note?: string;
+}
+
+export interface WeekendEvent {
+  id: string;
+  salonId: string;
+  salonName: string;
+  title: string;
+  description: string;
+  gameType: BilliardGameType;
+  date: string; // e.g. "Cumartesi 15:00"
+  entryFee: number;
+  prize: string;
+  capacity: number;
+  registeredCount: number;
+  isRegistered?: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -179,7 +210,11 @@ export interface ChatMessage {
   channelId: string; // 'turkiye', 'sehir_{city}', 'salon_{salonId}', or direct 'dm_{userId1}_{userId2}'
   text: string;
   imageUrl?: string;
+  videoUrl?: string;
+  mediaType?: 'TEXT' | 'IMAGE' | 'VIDEO';
   replyToId?: string;
+  replyToText?: string;
+  replyToSenderName?: string;
   createdAt: string;
   isReported?: boolean;
 }

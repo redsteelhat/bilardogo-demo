@@ -18,6 +18,8 @@ import {
   LoyaltyReward,
   ChatMessage,
   HeadToHeadRecord,
+  SoloPracticeRecord,
+  WeekendEvent,
 } from '../types';
 import {
   CITIES,
@@ -62,6 +64,10 @@ interface AppContextType {
   loyaltyRewards: LoyaltyReward[];
   chatMessages: ChatMessage[];
   headToHead: HeadToHeadRecord[];
+  soloPracticeRecords: SoloPracticeRecord[];
+  weekendEvents: WeekendEvent[];
+  friends: string[];
+  blockedUsers: string[];
 
   // User Actions
   updatePresenceStatus: (status: SalonPresenceStatus, salonId?: string, etaMinutes?: number) => void;
@@ -72,7 +78,10 @@ interface AppContextType {
   quickJoinTableWithoutMatch: (salonId: string, tableNumber: number, opponentId: string, gameType: BilliardGameType) => boolean;
   submitMatchResult: (matchId: string, result: MatchResult) => void;
   confirmMatchResult: (matchId: string) => void;
-  recordSoloPractice: (gameType: '3_BANT' | 'KARAMBOL', points: number, innings: number, highestRun?: number) => void;
+  recordSoloPractice: (gameType: '3_BANT' | 'KARAMBOL', points: number, innings: number, highestRun?: number, note?: string) => void;
+  toggleFriend: (userId: string) => void;
+  toggleBlockUser: (userId: string) => void;
+  joinWeekendEvent: (eventId: string) => boolean;
 
   // Orders
   placeOrder: (order: Omit<SalonOrder, 'id' | 'createdAt' | 'status'>) => SalonOrder;
@@ -81,7 +90,7 @@ interface AppContextType {
   updateCafeOrderStatus: (orderId: string, status: any) => void;
 
   // Chat
-  sendMessage: (channelId: string, text: string, imageUrl?: string, replyToId?: string) => void;
+  sendMessage: (channelId: string, text: string, imageUrl?: string, replyToId?: string, videoUrl?: string, replyToText?: string, replyToSenderName?: string) => void;
   reportUserOrMessage: (reportedUserId: string, targetType: 'KULLANICI' | 'MESAJ', targetId: string, snippet: string, reason: string) => void;
 
   // Business Panel Actions
@@ -180,6 +189,100 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [headToHead, setHeadToHead] = useState<HeadToHeadRecord[]>(() => {
     const saved = localStorage.getItem('bg_h2h');
     return saved ? JSON.parse(saved) : INITIAL_HEAD_TO_HEAD;
+  });
+
+  const [soloPracticeRecords, setSoloPracticeRecords] = useState<SoloPracticeRecord[]>(() => {
+    const saved = localStorage.getItem('bg_solo_practice');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 'prac-1',
+        userId: 'usr-berkay',
+        gameType: '3_BANT',
+        points: 32,
+        innings: 28,
+        average: 1.142,
+        highestRun: 8,
+        date: '18 Eylül 2026',
+        note: 'Kısa bant - uzun bant bağlantı vuruşları antrenmanı',
+      },
+      {
+        id: 'prac-2',
+        userId: 'usr-berkay',
+        gameType: '3_BANT',
+        points: 40,
+        innings: 34,
+        average: 1.176,
+        highestRun: 11,
+        date: '15 Eylül 2026',
+        note: 'Kleps ve karşı köşe pikaj denemeleri',
+      },
+      {
+        id: 'prac-3',
+        userId: 'usr-berkay',
+        gameType: 'KARAMBOL',
+        points: 65,
+        innings: 38,
+        average: 1.710,
+        highestRun: 19,
+        date: '12 Eylül 2026',
+        note: 'Amerikan serisi pozisyon koruma',
+      }
+    ];
+  });
+
+  const [weekendEvents, setWeekendEvents] = useState<WeekendEvent[]>(() => {
+    const saved = localStorage.getItem('bg_weekend_events');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 'we-1',
+        salonId: 'salon-fbn',
+        salonName: 'FBN Bilardo Salonu',
+        title: 'Cumartesi 3 Bant Handikaplı Seri Turnuvası',
+        description: 'Her seviyeden oyuncunun handikap sistemiyle eşit şansla yarıştığı eğlenceli hafta sonu mini turnuvası.',
+        gameType: '3_BANT',
+        date: 'Bu Cumartesi 14:00',
+        entryFee: 150,
+        prize: '1.ye 2.000 TL Salon Kredisi + Özel Bilardo Tebeşiri',
+        capacity: 16,
+        registeredCount: 11,
+      },
+      {
+        id: 'we-2',
+        salonId: 'salon-arena',
+        salonName: 'Arena Bilardo Kulübü',
+        title: 'Pazar 9-Top Açık Çift Eleme Mini Turnuva',
+        description: 'Pazar akşamı dinamik ve tempolu 9 Top mücadelesi! Kayıtlar salon resepsiyonu veya uygulama üzerinden.',
+        gameType: 'DOKUZ_TOP',
+        date: 'Bu Pazar 16:30',
+        entryFee: 100,
+        prize: 'İlk 3\'e Kupa & Madalya + 1 Aylık Ücretsiz İçecek Aboneliği',
+        capacity: 12,
+        registeredCount: 8,
+      },
+      {
+        id: 'we-3',
+        salonId: 'salon-platin',
+        salonName: 'Platin Bilardo Salonu',
+        title: 'Kadıköy Karambol İkili Takım Etkinliği',
+        description: 'İkişerli takımlarla eğlenceli karambol akşamı. Partnerinle gel veya salonda eşleş.',
+        gameType: 'KARAMBOL',
+        date: 'Pazar 18:00',
+        entryFee: 80,
+        prize: 'Şampiyon Çifte Akşam Yemeği Menüsü & Hatıra Plaketi',
+        capacity: 8,
+        registeredCount: 6,
+      },
+    ];
+  });
+
+  const [friends, setFriends] = useState<string[]>(() => {
+    const saved = localStorage.getItem('bg_friends');
+    return saved ? JSON.parse(saved) : ['usr-tarik', 'usr-halil'];
+  });
+
+  const [blockedUsers, setBlockedUsers] = useState<string[]>(() => {
+    const saved = localStorage.getItem('bg_blocked_users');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -722,9 +825,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Solo Practice recording (Bireysel antrenman ortalaması kaydetme)
-  const recordSoloPractice = (gameType: '3_BANT' | 'KARAMBOL', points: number, innings: number, highestRun?: number) => {
+  const recordSoloPractice = (gameType: '3_BANT' | 'KARAMBOL', points: number, innings: number, highestRun?: number, note?: string) => {
     if (innings <= 0) return;
     const avg = Number((points / innings).toFixed(3));
+    const newRecord: SoloPracticeRecord = {
+      id: `prac-${Date.now()}`,
+      userId: currentUser.id,
+      gameType,
+      points,
+      innings,
+      average: avg,
+      highestRun: highestRun || 0,
+      date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      note: note || (gameType === '3_BANT' ? 'Bireysel 3 Bant İsteka & Ortalama Antrenmanı' : 'Bireysel Karambol Antrenmanı'),
+    };
+
+    setSoloPracticeRecords(prev => [newRecord, ...prev]);
 
     setUsers(prev =>
       prev.map(u => {
@@ -763,7 +879,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    showToast(`Bireysel antrenman kaydedildi! Yeni Genel Ortalama güncellendi.`);
+    showToast(`Bireysel antrenman kaydedildi! Yeni Genel Ortalama: ${avg}`);
+  };
+
+  const toggleFriend = (userId: string) => {
+    setFriends(prev => {
+      const isFriend = prev.includes(userId);
+      const next = isFriend ? prev.filter(id => id !== userId) : [...prev, userId];
+      showToast(isFriend ? 'Kullanıcı arkadaş listesinden çıkarıldı.' : 'Kullanıcı arkadaş olarak eklendi!');
+      return next;
+    });
+  };
+
+  const toggleBlockUser = (userId: string) => {
+    setBlockedUsers(prev => {
+      const isBlocked = prev.includes(userId);
+      const next = isBlocked ? prev.filter(id => id !== userId) : [...prev, userId];
+      showToast(isBlocked ? 'Kullanıcının engeli kaldırıldı.' : 'Kullanıcı engellendi.');
+      return next;
+    });
+  };
+
+  const joinWeekendEvent = (eventId: string): boolean => {
+    const ev = weekendEvents.find(e => e.id === eventId);
+    if (!ev) return false;
+    if (ev.isRegistered) {
+      showToast('Bu hafta sonu etkinliğine zaten kayıtlısınız.');
+      return false;
+    }
+    if (ev.registeredCount >= ev.capacity) {
+      showToast('Kontenjan dolmuştur!');
+      return false;
+    }
+
+    setWeekendEvents(prev =>
+      prev.map(e => (e.id === eventId ? { ...e, registeredCount: e.registeredCount + 1, isRegistered: true } : e))
+    );
+    showToast(`"${ev.title}" etkinliğine kaydınız başarıyla alındı!`);
+    return true;
   };
 
   // Order food / drinks
@@ -788,7 +941,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Chat message
-  const sendMessage = (channelId: string, text: string, imageUrl?: string, replyToId?: string) => {
+  const sendMessage = (
+    channelId: string,
+    text: string,
+    imageUrl?: string,
+    replyToId?: string,
+    videoUrl?: string,
+    replyToText?: string,
+    replyToSenderName?: string
+  ) => {
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       senderId: currentUser.id,
@@ -797,7 +958,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       channelId,
       text,
       imageUrl,
+      videoUrl,
+      mediaType: videoUrl ? 'VIDEO' : imageUrl ? 'IMAGE' : 'TEXT',
       replyToId,
+      replyToText,
+      replyToSenderName,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
@@ -1148,6 +1313,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loyaltyRewards,
         chatMessages,
         headToHead,
+        soloPracticeRecords,
+        weekendEvents,
+        friends,
+        blockedUsers,
+        toggleFriend,
+        toggleBlockUser,
+        joinWeekendEvent,
         updatePresenceStatus,
         updateMatchStatus,
         sendMatchRequest,

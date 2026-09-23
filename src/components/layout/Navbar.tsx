@@ -2,32 +2,20 @@ import React, { useState } from 'react';
 import {
   MapPin,
   Bell,
-  BookOpen,
-  UserCheck,
-  Store,
-  Shield,
-  Briefcase,
   Flame,
   CheckCircle2,
   ChevronDown,
   X,
-  ExternalLink,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CITIES } from '../../data/mockData';
-import { UserRole } from '../../types';
 
 interface NavbarProps {
-  onOpenTechDocs?: () => void;
-  onOpenDocs?: () => void;
-  onOpenQrScanner: () => void;
+  onOpenQrScanner?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenTechDocs, onOpenDocs, onOpenQrScanner }) => {
-  const handleOpenDocs = onOpenTechDocs || onOpenDocs || (() => {});
+export const Navbar: React.FC<NavbarProps> = () => {
   const {
-    currentRole,
-    setCurrentRole,
     currentUser,
     selectedCity,
     setSelectedCity,
@@ -35,29 +23,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTechDocs, onOpenDocs, onOp
     activeMatch,
     setActiveView,
     toastMessage,
-    notificationTemplates,
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
-
-  const roles: { role: UserRole; label: string; icon: any }[] = [
-    { role: 'kullanici', label: 'Oyuncu', icon: UserCheck },
-    { role: 'isletme', label: 'Salon İşletmesi', icon: Store },
-    { role: 'calisan', label: 'Çalışan', icon: Briefcase },
-    { role: 'admin', label: 'Admin Paneli', icon: Shield },
-  ];
-
-  const handleRoleChange = (role: UserRole) => {
-    setCurrentRole(role);
-    if (role === 'isletme' || role === 'calisan') {
-      setActiveView('business_dashboard');
-    } else if (role === 'admin') {
-      setActiveView('admin_dashboard');
-    } else {
-      setActiveView('home');
-    }
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800">
@@ -130,24 +99,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTechDocs, onOpenDocs, onOp
           </div>
         </div>
 
-        {/* Center: Role Switcher Buttons */}
-        <div className="hidden lg:flex items-center bg-neutral-900/80 p-1 rounded-xl border border-neutral-800">
-          {roles.map(({ role, label, icon: Icon }) => (
-            <button
-              key={role}
-              onClick={() => handleRoleChange(role)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                currentRole === role
-                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm shadow-amber-500/20'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-
         {/* Right Action Icons */}
         <div className="flex items-center gap-2">
           {/* Active match indicator if exists */}
@@ -171,16 +122,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTechDocs, onOpenDocs, onOp
             </button>
           )}
 
-          {/* Tech Docs Trigger */}
-          <button
-            onClick={handleOpenDocs}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 text-neutral-300 hover:text-white text-xs font-medium transition-all"
-            title="Sistem Teknik Dökümantasyonu"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Teknik Dökümantasyon</span>
-          </button>
-
           {/* Notifications Trigger */}
           <div className="relative">
             <button
@@ -200,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTechDocs, onOpenDocs, onOp
                     Bildirimler
                   </div>
                   <span className="text-[10px] text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-full">
-                    Dinamik Şablon Motoru
+                    Canlı Topluluk
                   </span>
                 </div>
 

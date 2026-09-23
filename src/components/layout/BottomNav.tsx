@@ -61,38 +61,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenQrScanner, onOpenDoc
           <span className="text-[10px]">Sosyal</span>
         </button>
 
-        {/* Profil / Role Panels */}
-        {currentRole === 'admin' ? (
-          <button
-            onClick={() => setActiveView('admin_dashboard')}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-              activeView === 'admin_dashboard' ? 'text-blue-400 font-bold' : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Shield className="w-5 h-5" />
-            <span className="text-[10px]">Admin</span>
-          </button>
-        ) : currentRole === 'isletme' || currentRole === 'calisan' ? (
-          <button
-            onClick={() => setActiveView('business_dashboard')}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-              activeView === 'business_dashboard' ? 'text-emerald-400 font-bold' : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Store className="w-5 h-5" />
-            <span className="text-[10px]">İşletme</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => setActiveView('profile')}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-              activeView === 'profile' ? 'text-amber-500 font-bold' : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <UserIcon className="w-5 h-5" />
-            <span className="text-[10px]">Profil</span>
-          </button>
-        )}
+        {/* Profil */}
+        <button
+          onClick={() => setActiveView('profile')}
+          className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+            activeView === 'profile' ? 'text-amber-500 font-bold' : 'text-neutral-400 hover:text-white'
+          }`}
+        >
+          <UserIcon className="w-5 h-5" />
+          <span className="text-[10px]">Profil</span>
+        </button>
 
       </div>
     </nav>
