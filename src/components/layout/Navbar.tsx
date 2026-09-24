@@ -6,6 +6,9 @@ import {
   CheckCircle2,
   ChevronDown,
   X,
+  User as UserIcon,
+  Store,
+  Shield,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CITIES } from '../../data/mockData';
@@ -22,11 +25,13 @@ export const Navbar: React.FC<NavbarProps> = () => {
     pendingRequestsForMe,
     activeMatch,
     setActiveView,
+    setCurrentRole,
     toastMessage,
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800">
@@ -174,20 +179,93 @@ export const Navbar: React.FC<NavbarProps> = () => {
             )}
           </div>
 
-          {/* User profile avatar thumbnail */}
-          <button
-            onClick={() => setActiveView('profile')}
-            className="flex items-center gap-2 p-1 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors"
-          >
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-7 h-7 rounded-lg object-cover"
-            />
-            <span className="text-xs font-semibold text-white hidden sm:inline max-w-[100px] truncate">
-              {currentUser.name}
-            </span>
-          </button>
+          {/* User profile avatar thumbnail & role menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 p-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors"
+              title="Profil & Yönetim Menüsü"
+            >
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-7 h-7 rounded-lg object-cover"
+              />
+              <span className="text-xs font-semibold text-white hidden sm:inline max-w-[100px] truncate">
+                {currentUser.name}
+              </span>
+              <ChevronDown className="w-3 h-3 text-neutral-400" />
+            </button>
+
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-3 py-2 border-b border-neutral-800/80 mb-1">
+                  <div className="text-xs font-bold text-white truncate">{currentUser.name}</div>
+                  <div className="text-[11px] text-neutral-400 font-mono">@{currentUser.username}</div>
+                </div>
+
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      setActiveView('profile');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center gap-2.5 transition-colors"
+                  >
+                    <UserIcon className="w-4 h-4 text-amber-400" />
+                    <span>Profilim & İstatistikler</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCurrentRole('isletme');
+                      setActiveView('business_dashboard');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Store className="w-4 h-4 text-amber-500" />
+                      <span>Salon İşletme Paneli</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-semibold group-hover:bg-amber-500/20">
+                      Giriş
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCurrentRole('admin');
+                      setActiveView('admin_dashboard');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Shield className="w-4 h-4 text-red-400" />
+                      <span>Süper Admin Paneli</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-semibold group-hover:bg-red-500/20">
+                      Yetkili
+                    </span>
+                  </button>
+
+                  <div className="pt-1 border-t border-neutral-800/80">
+                    <button
+                      onClick={() => {
+                        setCurrentRole('kullanici');
+                        setActiveView('home');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2.5 transition-colors"
+                    >
+                      <span>🎱 Oyuncu Ana Sayfası</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

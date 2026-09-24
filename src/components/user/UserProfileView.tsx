@@ -34,6 +34,8 @@ export const UserProfileView: React.FC = () => {
     salons,
     loyaltyRewards,
     showToast,
+    setActiveView,
+    setCurrentRole,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'istatistikler' | 'rakip_gecmisi' | 'son_maclar' | 'manuel_gecmis' | 'salonlar'>('istatistikler');
@@ -630,6 +632,63 @@ export const UserProfileView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 6. Yönetim & İşletme Panellerine Geçiş */}
+      <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-xl space-y-4">
+        <div>
+          <h3 className="font-bold text-base text-white flex items-center gap-2">
+            <Shield className="w-4 h-4 text-amber-500" />
+            Yönetim & İşletme Panelleri
+          </h3>
+          <p className="text-xs text-neutral-400 mt-0.5">
+            Salon yetkilileri, çalışanlar ve sistem yöneticileri için yönetim ekranlarına buradan doğrudan geçiş yapabilirsiniz.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+          <button
+            onClick={() => {
+              setCurrentRole('isletme');
+              setActiveView('business_dashboard');
+            }}
+            className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-amber-500/50 transition-all text-left flex items-start gap-3.5 group shadow-md"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Store className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                <span>Salon İşletme Paneli</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Giriş Yap →</span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+                Masa durumu (boş/dolu), garson ve kafeterya siparişleri, salon duyuruları ve turnuva yönetimi.
+              </p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentRole('admin');
+              setActiveView('admin_dashboard');
+            }}
+            className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-red-500/50 transition-all text-left flex items-start gap-3.5 group shadow-md"
+          >
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-sm text-white group-hover:text-red-400 transition-colors flex items-center gap-1.5">
+                <span>Süper Admin Paneli</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-semibold">Yetkili Giriş →</span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+                Platform geneli salon onayları, şikayet & moderasyon takibi, sponsorluk ve reklam yönetimi.
+              </p>
+            </div>
+          </button>
+        </div>
+      </div>
 
       {/* Solo Practice Entry Modal */}
       {showSoloPracticeModal && (

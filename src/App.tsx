@@ -9,6 +9,8 @@ import { UserProfileView } from './components/user/UserProfileView';
 import { SocialView } from './components/user/SocialView';
 import { EventsBulletinView } from './components/user/EventsBulletinView';
 import { OrderFoodView } from './components/user/OrderFoodView';
+import { BusinessDashboardView } from './components/business/BusinessDashboardView';
+import { AdminDashboardView } from './components/admin/AdminDashboardView';
 import { MatchRequestModal } from './components/user/MatchRequestModal';
 import { QrModal } from './components/common/QrModal';
 import { User, BilliardGameType } from './types';
@@ -111,6 +113,40 @@ const AppContent: React.FC = () => {
         {activeView === 'social' && <SocialView />}
 
         {activeView === 'order' && <OrderFoodView />}
+
+        {activeView === 'business_dashboard' && (
+          <div className="space-y-2">
+            <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs text-amber-400 max-w-7xl mx-auto">
+              <span className="font-bold flex items-center gap-1.5">
+                🏢 Salon İşletme Paneli
+              </span>
+              <button
+                onClick={() => setActiveView('home')}
+                className="px-3 py-1 rounded-lg bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors shadow-sm"
+              >
+                ← Oyuncu Arayüzüne Dön
+              </button>
+            </div>
+            <BusinessDashboardView onOpenTableQr={handleOpenTableQr} />
+          </div>
+        )}
+
+        {activeView === 'admin_dashboard' && (
+          <div className="space-y-2">
+            <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2 flex items-center justify-between text-xs text-red-400 max-w-7xl mx-auto">
+              <span className="font-bold flex items-center gap-1.5">
+                🛡️ Süper Admin Paneli
+              </span>
+              <button
+                onClick={() => setActiveView('home')}
+                className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold hover:bg-red-400 transition-colors shadow-sm"
+              >
+                ← Oyuncu Arayüzüne Dön
+              </button>
+            </div>
+            <AdminDashboardView onOpenDocs={() => {}} />
+          </div>
+        )}
       </main>
 
       {/* Mobile Floating Bottom Bar */}
