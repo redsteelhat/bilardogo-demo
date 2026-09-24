@@ -142,10 +142,114 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<UserRole>('kullanici');
+  const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
+    try {
+      const saved = localStorage.getItem('bg_current_role');
+      if (saved === 'admin' || saved === 'isletme' || saved === 'kullanici') {
+        return saved as UserRole;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return 'kullanici';
+  });
+
+  const setCurrentRole = (role: UserRole) => {
+    setCurrentRoleState(role);
+    try {
+      localStorage.setItem('bg_current_role', role);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const [selectedCity, setSelectedCity] = useState<string>('İstanbul');
-  const [activeView, setActiveView] = useState<string>('home');
-  const [selectedSalonId, setSelectedSalonId] = useState<string | null>('salon-fbn');
+  const [activeView, setActiveView] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const rawPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+      const rawHash = window.location.hash.toLowerCase().replace(/^#+/, '').replace(/^\/+/, '').replace(/\/+$/, '');
+      const savedRole = localStorage.getItem('bg_current_role');
+
+      if (rawPath === '/admin' || rawPath.startsWith('/admin/') || rawHash === 'admin') {
+        return savedRole === 'admin' ? 'admin_dashboard' : 'admin_auth';
+      }
+      if (
+        rawPath === '/salon' ||
+        rawPath.startsWith('/salon/') ||
+        rawPath === '/isletme' ||
+        rawPath.startsWith('/isletme/') ||
+        rawHash === 'salon' ||
+        rawHash === 'isletme'
+      ) {
+        return savedRole === 'isletme' ? 'business_dashboard' : 'business_auth';
+      }
+      if (rawHash === 'bulten' || rawPath === '/bulletin') {
+        return 'bulletin';
+      }
+      if (rawHash === 'profil' || rawPath === '/profile') {
+        return 'profile';
+      }
+      if (rawHash === 'sosyal' || rawPath === '/social') {
+        return 'social';
+      }
+    }
+    return 'home';
+  });
+
+  // Keep browser URL synchronized with activeView
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+    const currentHash = window.location.hash.toLowerCase().replace(/^#+/, '').replace(/^\/+/, '');
+
+    if (activeView === 'business_dashboard' || activeView === 'business_auth') {
+      if (currentPath !== '/salon' && currentHash !== 'salon') {
+        try {
+          window.history.pushState(null, '', '/salon');
+        } catch (e) {
+          window.location.hash = 'salon';
+        }
+      }
+    } else if (activeView === 'admin_dashboard' || activeView === 'admin_auth') {
+      if (currentPath !== '/admin' && currentHash !== 'admin') {
+        try {
+          window.history.pushState(null, '', '/admin');
+        } catch (e) {
+          window.location.hash = 'admin';
+        }
+      }
+    } else if (activeView === 'home') {
+      if (currentPath === '/salon' || currentPath === '/admin' || currentHash === 'salon' || currentHash === 'admin') {
+        try {
+          window.history.pushState(null, '', '/');
+        } catch (e) {
+          window.location.hash = '';
+        }
+      }
+    }
+  }, [activeView]);
+
+  const [selectedSalonId, setSelectedSalonIdState] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('bg_selected_salon_id') || 'salon-fbn';
+    } catch (e) {
+      return 'salon-fbn';
+    }
+  });
+
+  const setSelectedSalonId = (id: string | null) => {
+    setSelectedSalonIdState(id);
+    try {
+      if (id) {
+        localStorage.setItem('bg_selected_salon_id', id);
+      } else {
+        localStorage.removeItem('bg_selected_salon_id');
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Core State with fallback to initial data

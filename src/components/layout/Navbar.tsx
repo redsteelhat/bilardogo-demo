@@ -22,6 +22,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) => {
   const {
     currentUser,
+    currentRole,
     selectedCity,
     setSelectedCity,
     pendingRequestsForMe,
@@ -51,7 +52,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) =
         {/* Brand Logo & City Picker */}
         <div className="flex items-center gap-3 sm:gap-6">
           <button
-            onClick={() => setActiveView('home')}
+            onClick={() => {
+              setActiveView('home');
+              try {
+                window.history.pushState(null, '', '/');
+              } catch (e) {
+                window.location.hash = '';
+              }
+            }}
             className="flex items-center gap-2.5 focus:outline-none group text-left"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-extrabold text-neutral-950 shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
@@ -123,8 +131,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) =
           {/* Salon Portali Hızlı Buton */}
           <button
             onClick={() => {
-              setActiveView('business_auth');
-              window.location.hash = 'salon';
+              if (currentRole === 'isletme') {
+                setActiveView('business_dashboard');
+              } else {
+                setActiveView('business_auth');
+              }
+              try {
+                window.history.pushState(null, '', '/salon');
+              } catch (e) {
+                window.location.hash = 'salon';
+              }
             }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all shadow-sm"
             title="Salon İşletme Girişi & Kaydı (/salon)"
@@ -137,8 +153,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) =
           {/* Admin Portali Hızlı Buton */}
           <button
             onClick={() => {
-              setActiveView('admin_auth');
-              window.location.hash = 'admin';
+              if (currentRole === 'admin') {
+                setActiveView('admin_dashboard');
+              } else {
+                setActiveView('admin_auth');
+              }
+              try {
+                window.history.pushState(null, '', '/admin');
+              } catch (e) {
+                window.location.hash = 'admin';
+              }
             }}
             className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all shadow-sm"
             title="Süper Admin Girişi & Kaydı (/admin)"
@@ -259,8 +283,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) =
 
                   <button
                     onClick={() => {
-                      setActiveView('business_auth');
-                      window.location.hash = 'salon';
+                      if (currentRole === 'isletme') {
+                        setActiveView('business_dashboard');
+                      } else {
+                        setActiveView('business_auth');
+                      }
+                      try {
+                        window.history.pushState(null, '', '/salon');
+                      } catch (e) {
+                        window.location.hash = 'salon';
+                      }
                       setShowUserMenu(false);
                     }}
                     className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"
@@ -276,8 +308,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) =
 
                   <button
                     onClick={() => {
-                      setActiveView('admin_auth');
-                      window.location.hash = 'admin';
+                      if (currentRole === 'admin') {
+                        setActiveView('admin_dashboard');
+                      } else {
+                        setActiveView('admin_auth');
+                      }
+                      try {
+                        window.history.pushState(null, '', '/admin');
+                      } catch (e) {
+                        window.location.hash = 'admin';
+                      }
                       setShowUserMenu(false);
                     }}
                     className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"

@@ -35,6 +35,7 @@ export const UserProfileView: React.FC = () => {
     loyaltyRewards,
     showToast,
     setActiveView,
+    currentRole,
     setCurrentRole,
   } = useApp();
 
@@ -648,8 +649,16 @@ export const UserProfileView: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <button
             onClick={() => {
-              setActiveView('business_auth');
-              window.location.hash = 'salon';
+              if (currentRole === 'isletme') {
+                setActiveView('business_dashboard');
+              } else {
+                setActiveView('business_auth');
+              }
+              try {
+                window.history.pushState(null, '', '/salon');
+              } catch (e) {
+                window.location.hash = 'salon';
+              }
             }}
             className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-amber-500/50 transition-all text-left flex items-start gap-3.5 group shadow-md"
           >
@@ -658,19 +667,27 @@ export const UserProfileView: React.FC = () => {
             </div>
             <div>
               <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
-                <span>Salon İşletme Girişi / Kaydı</span>
+                <span>{currentRole === 'isletme' ? 'Salon İşletme Paneli' : 'Salon İşletme Girişi / Kaydı'}</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">/salon</span>
               </div>
               <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                İşletme hesabı oluşturma, masa ekleme, saat ücreti, menü & sipariş ve profil yönetimi.
+                {currentRole === 'isletme' ? 'Masa durumları, canlı adisyon, menü ve salon ayarları paneline git.' : 'İşletme hesabı oluşturma, masa ekleme, saat ücreti, menü & sipariş ve profil yönetimi.'}
               </p>
             </div>
           </button>
 
           <button
             onClick={() => {
-              setActiveView('admin_auth');
-              window.location.hash = 'admin';
+              if (currentRole === 'admin') {
+                setActiveView('admin_dashboard');
+              } else {
+                setActiveView('admin_auth');
+              }
+              try {
+                window.history.pushState(null, '', '/admin');
+              } catch (e) {
+                window.location.hash = 'admin';
+              }
             }}
             className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-red-500/50 transition-all text-left flex items-start gap-3.5 group shadow-md"
           >
@@ -679,11 +696,11 @@ export const UserProfileView: React.FC = () => {
             </div>
             <div>
               <div className="font-bold text-sm text-white group-hover:text-red-400 transition-colors flex items-center gap-1.5">
-                <span>Süper Admin Girişi / Kaydı</span>
+                <span>{currentRole === 'admin' ? 'Süper Admin Paneli' : 'Süper Admin Girişi / Kaydı'}</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-semibold">/admin</span>
               </div>
               <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                Platform geneli salon onayları, şikayet & moderasyon takibi, sponsorluk ve reklam yönetimi.
+                {currentRole === 'admin' ? 'Salon onayları, şikayet ve reklam paneline git.' : 'Platform geneli salon onayları, şikayet & moderasyon takibi, sponsorluk ve reklam yönetimi.'}
               </p>
             </div>
           </button>

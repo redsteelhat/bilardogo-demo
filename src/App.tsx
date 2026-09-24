@@ -52,23 +52,48 @@ const AppContent: React.FC = () => {
   // URL Hash & Path routing synchronization
   useEffect(() => {
     const handleUrlRouting = () => {
-      const hash = window.location.hash.toLowerCase().replace('#', '');
-      const path = window.location.pathname.toLowerCase();
+      const rawHash = window.location.hash.toLowerCase();
+      const hash = rawHash.replace(/^#+/, '').replace(/^\/+/, '').replace(/\/+$/, '');
+      const rawPath = window.location.pathname.toLowerCase();
+      const path = rawPath.replace(/\/+$/, '');
 
-      if (hash === 'admin' || path === '/admin') {
+      if (hash === 'admin' || path === '/admin' || path.startsWith('/admin/')) {
         if (currentRole === 'admin') {
           setActiveView('admin_dashboard');
         } else {
           setActiveView('admin_auth');
         }
-      } else if (hash === 'salon' || hash === 'isletme' || path === '/salon' || path === '/isletme') {
+      } else if (
+        hash === 'salon' ||
+        hash === 'isletme' ||
+        path === '/salon' ||
+        path === '/isletme' ||
+        path.startsWith('/salon/') ||
+        path.startsWith('/isletme/')
+      ) {
         if (currentRole === 'isletme') {
           setActiveView('business_dashboard');
         } else {
           setActiveView('business_auth');
         }
-      } else if (hash === 'belge' || hash === 'docs') {
+      } else if (hash === 'belge' || hash === 'docs' || path === '/docs' || path === '/belge') {
         setShowDocsModal(true);
+      } else if (hash === 'bulten' || path === '/bulletin') {
+        setActiveView('bulletin');
+      } else if (hash === 'profil' || path === '/profile') {
+        setActiveView('profile');
+      } else if (hash === 'sosyal' || path === '/social') {
+        setActiveView('social');
+      } else if (path === '' || path === '/' || hash === '' || hash === 'home') {
+        // Back to home
+        if (
+          activeView === 'business_dashboard' ||
+          activeView === 'business_auth' ||
+          activeView === 'admin_dashboard' ||
+          activeView === 'admin_auth'
+        ) {
+          setActiveView('home');
+        }
       }
     };
 
@@ -79,7 +104,7 @@ const AppContent: React.FC = () => {
       window.removeEventListener('hashchange', handleUrlRouting);
       window.removeEventListener('popstate', handleUrlRouting);
     };
-  }, [currentRole, setActiveView]);
+  }, [currentRole, setActiveView, activeView]);
 
   const handleOpenMatchModal = (targetUser: User, preferredGame: BilliardGameType = '3_BANT') => {
     setMatchModalUser(targetUser);
@@ -182,7 +207,11 @@ const AppContent: React.FC = () => {
                 <button
                   onClick={() => {
                     setActiveView('home');
-                    window.location.hash = '';
+                    try {
+                      window.history.pushState(null, '', '/');
+                    } catch (e) {
+                      window.location.hash = '';
+                    }
                   }}
                   className="px-3 py-1 rounded-lg bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors shadow-sm"
                 >
@@ -209,7 +238,11 @@ const AppContent: React.FC = () => {
                 <button
                   onClick={() => {
                     setActiveView('admin_auth');
-                    window.location.hash = 'admin';
+                    try {
+                      window.history.pushState(null, '', '/admin');
+                    } catch (e) {
+                      window.location.hash = 'admin';
+                    }
                   }}
                   className="px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-700 transition-colors"
                 >
@@ -218,7 +251,11 @@ const AppContent: React.FC = () => {
                 <button
                   onClick={() => {
                     setActiveView('home');
-                    window.location.hash = '';
+                    try {
+                      window.history.pushState(null, '', '/');
+                    } catch (e) {
+                      window.location.hash = '';
+                    }
                   }}
                   className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold hover:bg-red-400 transition-colors shadow-sm"
                 >

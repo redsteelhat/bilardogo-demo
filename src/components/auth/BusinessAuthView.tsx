@@ -95,7 +95,11 @@ export const BusinessAuthView: React.FC = () => {
           <button
             onClick={() => {
               setActiveView('home');
-              window.location.hash = '';
+              try {
+                window.history.pushState(null, '', '/');
+              } catch (e) {
+                window.location.hash = '';
+              }
             }}
             className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
           >
