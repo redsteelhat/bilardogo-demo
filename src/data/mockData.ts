@@ -264,6 +264,7 @@ export const INITIAL_SALONS: Salon[] = [
     phone: '0216 555 44 33',
     isOpen: true,
     openHours: '11:00 - 02:00',
+    hourlyRate: 300,
     coverImage: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=1200&q=80',
     photos: [
       'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=800&q=80',
@@ -370,6 +371,7 @@ export const INITIAL_SALONS: Salon[] = [
     phone: '0212 261 80 90',
     isOpen: true,
     openHours: '12:00 - 03:00',
+    hourlyRate: 250,
     coverImage: 'https://images.unsplash.com/photo-1544919982-b61976f0ba43?auto=format&fit=crop&w=1200&q=80',
     photos: [
       'https://images.unsplash.com/photo-1544919982-b61976f0ba43?auto=format&fit=crop&w=800&q=80',
@@ -426,6 +428,7 @@ export const INITIAL_SALONS: Salon[] = [
     phone: '0312 426 12 34',
     isOpen: true,
     openHours: '10:00 - 01:00',
+    hourlyRate: 280,
     coverImage: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80',
     photos: [
       'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80',

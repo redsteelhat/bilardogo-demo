@@ -7,7 +7,7 @@ interface TechDocsModalProps {
 }
 
 export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'genel' | 'mimari' | 'modeller' | 'qr_mac' | 'istatistik' | 'api'>('genel');
+  const [activeTab, setActiveTab] = useState<'genel' | 'salon_sayfasi' | 'mimari' | 'modeller' | 'qr_mac' | 'istatistik' | 'api'>('salon_sayfasi');
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -15,28 +15,17 @@ export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose })
   const copyDocMarkdown = () => {
     const docText = `# BilardoGo - Kapsamlı Sistem Mimarisi ve Teknik Dökümantasyon
 Versiyon: 1.0.0 Production Release
-Roller: Kullanıcı / İşletme Salonu / Salon Çalışanı / Merkezi Admin
+Roller: Kullanıcı (Oyuncu) / Salon İşletmesi / Salon Çalışanı / Süper Admin
 
-## 1. Sistem Mimarisi ve Teknoloji Yığını
-- Frontend: React 19, TypeScript, Tailwind CSS v4, Motion, Lucide Icons.
-- Backend/API: Node.js Express (RESTful), Vite SPA Server, SSE / WebSocket hazırlığı.
-- State Management: React Context API + LocalStorage kalıcılık katmanı.
-- QR Engine: QRCode SVG & Canvas entegrasyonu (Salon + Masa tanımlayıcı token).
-
-## 2. Durum ve Eşleşme Yaşam Döngüsü (State Machine)
-- Salon Durumu: SALONDA / GELECEK (ETA dk) / CEVRIMDISI
-- Maç Durumu: OYNAYACAK / ISTEMIYOR / MAC_YAPACAK / MACTA
-- Maç Yaşam Döngüsü:
-  İstek -> Kabul -> Maç Yapacak -> QR Okutma (Masa Bağlantısı) -> Maç Başladı (Masa DOLU) -> Maç Bitti -> Rakip Sonuç Onayı -> Tamamlandı (Masa BOS).
-
-## 3. İstatistik ve 3 Bant / Karambol Ortalama Algoritması
-- Genel Ortalama = Toplam Sayı / Toplam İsteka (Virgülden sonra 3 basamak, 4. basamağa göre yuvarlama).
-- Seri / Break 'Hatırlamıyorum' seçeneğinde değer 0 sayılmaz, istatistiki seriler bozulmaz.
-- İkili karşılıklı maç geçmişi oyuncu-oyuncu bazında tutulur ve oyun türüne göre filtrelenir.
-
-## 4. Salon İçi Sipariş Sistemi
-- BilardoGo ödeme almaz. Ödeme kasada işletmeye yapılır.
-- 3 Kullanım Modu: 1) Masa Oyuncuları Siparişi, 2) Bireysel Sipariş, 3) Ortak Sipariş Oturumu (Kod ile katılım, İzleyici desteği).`;
+## 1. Salon Sayfası ve İşletme Sistemi
+- Canlı Masa Durumları: Müsait, Dolu, Kullanım Dışı.
+- Salondaki Aktif Oyuncular: İsim-soyisim başharf rozetleri ([TÇ], [BK], [...]).
+- Birazdan Gelecekler: Tahmini varış süresi (ETA dk).
+- Maç Arayanlar: Bu salonda veya civarında rakip bekleyen aktif oyuncular.
+- Saatlik Masa Ücretleri: Salon ve masa bazlı saatlik ücret (TL/saat) şeffaf gösterimi.
+- Masaya Sipariş Sistemi: Sipariş Edildi -> Hazırlanıyor -> Servis Edildi -> Kasada Ödeme.
+- Masa Ekleme & Masa Türü Seçimi: 3 Bant, Karambol, Amerikan, 9 Top, Snooker.
+- Salon Profil Bilgileri: VKN, adres, telefon, Simonis çuha ve olanaklar düzenleme.`;
 
     navigator.clipboard.writeText(docText);
     setCopied(true);
@@ -84,6 +73,14 @@ Roller: Kullanıcı / İşletme Salonu / Salon Çalışanı / Merkezi Admin
         {/* Tab Selector */}
         <div className="flex items-center gap-2 px-6 py-2.5 bg-neutral-950/60 border-b border-neutral-800 text-xs overflow-x-auto">
           <button
+            onClick={() => setActiveTab('salon_sayfasi')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+              activeTab === 'salon_sayfasi' ? 'bg-amber-500 text-neutral-950 shadow-sm font-bold' : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            🎱 Salon Sayfası & İşletme Sistemi
+          </button>
+          <button
             onClick={() => setActiveTab('genel')}
             className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'genel' ? 'bg-amber-500 text-neutral-950 shadow-sm' : 'text-neutral-400 hover:text-white'
@@ -127,6 +124,84 @@ Roller: Kullanıcı / İşletme Salonu / Salon Çalışanı / Merkezi Admin
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 text-sm leading-relaxed">
+          {activeTab === 'salon_sayfasi' && (
+            <div className="space-y-5">
+              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+                <div className="flex items-center gap-2 text-amber-400 font-extrabold text-base">
+                  <BookOpen className="w-5 h-5" />
+                  <span>BilardoGo Nedir? Salon Sayfası & İşletme Ekosistemi</span>
+                </div>
+                <p className="text-neutral-200 text-xs leading-relaxed">
+                  Salon Sayfası, BilardoGo platformunun hem oyuncular hem de bilardo kulübü işletmeleri için kalbi niteliğindedir. Oyuncular gitmeden önce salonun doluluğunu, masalardaki oyuncuları ve saat ücretini görür; işletme ise masalarını, siparişlerini ve turnuvalarını tek panelden yönetir.
+                </p>
+              </div>
+
+              {/* 2 Sütun: Oyuncu Arayüzü & İşletme Paneli */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-3">
+                  <div className="font-extrabold text-amber-400 flex items-center gap-2 text-sm border-b border-neutral-800 pb-2">
+                    <span>1. Oyuncular İçin Salon Sayfası Neleri İçerir?</span>
+                  </div>
+                  <ul className="text-xs space-y-2.5 text-neutral-300">
+                    <li>
+                      <strong className="text-white">✓ Canlı Masa Durumları:</strong> Salonun masalarının Müsait, Dolu veya Kullanım Dışı durumları anlık olarak görüntülenir.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Salondaki Aktif Oyuncular:</strong> Salondaki oyuncuların isim-soyisim başharfleri yuvarlak rozetler içinde (örn: [TÇ], [BK], [...]) listelenir.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Birazdan Gelecekler & ETA:</strong> Salona doğru yola çıkan oyuncuların tahmini varış dakikası görüntülenir.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Maç Arayanlar:</strong> Salonda rakip bekleyen bilardo severler listelenir ve tek tıkla handikaplı maç teklif edilir.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Masa Başı Saat Ücreti:</strong> Salonun güncel saatlik masa ücreti (örn: 300 ₺ / saat) şeffafça listelenir.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Kafeterya Menüsü & Sipariş:</strong> Maçı bölmeden masaya çay, kahve veya tost siparişi verilir (Durum: 'Sipariş Edildi' → 'Hazırlanıyor' → 'Servis Edildi').
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ QR Kod ile Masaya Bağlanma:</strong> Masadaki QR kodu kameraya okutarak anında maça başlanır.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Salon Detayları & İletişim:</strong> Simonis 300 çuha, ısıtmalı masa özellikleri, açık adres, Google Maps yol tarifi ve telefon.
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-3">
+                  <div className="font-extrabold text-emerald-400 flex items-center gap-2 text-sm border-b border-neutral-800 pb-2">
+                    <span>2. Salon İşletme Paneli Hangi Özellikleri Sağlar?</span>
+                  </div>
+                  <ul className="text-xs space-y-2.5 text-neutral-300">
+                    <li>
+                      <strong className="text-white">✓ 3'lü Masa Durumu Kontrolü:</strong> Masaları tek tıkla <strong>Müsait</strong>, <strong>Dolu</strong> veya <strong>Kullanım Dışı</strong> yapabilme.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Masa Ekleme & Masa Türü Seçimi:</strong> 3 Bant, Karambol, Amerikan, 9 Top veya Snooker masa türlerini seçerek yeni masa ekleme/düzenleme/silme.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Saatlik Masa Ücreti Değiştirme:</strong> Salonun saatlik ücretini dilediği an güncelleme ve süre bazlı ciro hesaplama.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Menü Oluşturma & Fiyat Belirleme:</strong> Sıcak/soğuk içecek, tost ve atıştırmalık ürünleri ekleme, fiyatlarını belirleme ve mevcudiyet güncelleme.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Sipariş Durumu Yönetimi:</strong> Gelen siparişleri 'Sipariş Edildi' adımından alıp mutfak/servis sürecine taşıma.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Salon Profil Bilgilerini Doldurma:</strong> VKN vergi no, çalışma saatleri, açık adres, olanaklar ve fotoğrafları düzenleme.
+                    </li>
+                    <li>
+                      <strong className="text-white">✓ Turnuva Organizatörü & Duyurular:</strong> Salon kupaları açma, katılımcı toplama, kura çekme ve kampanya duyurusu yayınlama.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'genel' && (
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">

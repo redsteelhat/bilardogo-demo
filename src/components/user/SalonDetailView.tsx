@@ -34,6 +34,14 @@ interface SalonDetailViewProps {
   onOpenTableQr: (tableNumber: number, allowedGames: BilliardGameType[]) => void;
 }
 
+const getInitials = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toLocaleUpperCase('tr-TR');
+  }
+  return (parts[0]?.slice(0, 2) || '').toLocaleUpperCase('tr-TR');
+};
+
 export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
   salonId,
   onBack,
@@ -152,15 +160,48 @@ export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
               <span className="text-xs px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-neutral-200 border border-white/10">
                 {salon.followersCount + (isFollowing ? 1 : 0)} Takipçi
               </span>
+
+              {/* Salondaki Oyuncu Başharfleri Rozeti */}
+              {playersPresent.length > 0 && (
+                <div
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/15 text-xs shadow-md"
+                  title={`Salondaki Aktif Oyuncular: ${playersPresent.map(p => p.name).join(', ')}`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                  <div className="flex items-center -space-x-1.5">
+                    {playersPresent.slice(0, 3).map(p => (
+                      <div
+                        key={p.id}
+                        title={p.name}
+                        className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-neutral-950 font-black text-[8px] flex items-center justify-center border-2 border-neutral-950 shadow-sm"
+                      >
+                        {getInitials(p.name)}
+                      </div>
+                    ))}
+                    <div
+                      title="Ve diğer oyuncular"
+                      className="w-5 h-5 rounded-full bg-neutral-800 text-amber-400 font-black text-[9px] flex items-center justify-center border-2 border-neutral-950 tracking-tighter"
+                    >
+                      ...
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <button
-              onClick={() => setSelectedImage(salon.coverImage)}
-              className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs font-semibold text-white flex items-center gap-1.5 hover:bg-black/90 transition-colors"
-            >
-              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
-              <span>Görselleri Gör ({salonGalleryImages.length})</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 rounded-full bg-amber-500 text-neutral-950 text-xs font-black shadow-md">
+                {salon.hourlyRate || 300} ₺ / saat
+              </div>
+
+              <button
+                onClick={() => setSelectedImage(salon.coverImage)}
+                className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs font-semibold text-white flex items-center gap-1.5 hover:bg-black/90 transition-colors"
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                <span>Görseller ({salonGalleryImages.length})</span>
+              </button>
+            </div>
           </div>
 
           {/* Bottom Title & Actions */}
@@ -223,9 +264,9 @@ export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
             <span className="text-sm font-bold text-white mt-0.5 block">{americanTables.length} Masa</span>
           </div>
           <div className="p-3 rounded-2xl bg-neutral-900 border border-neutral-800">
-            <span className="text-neutral-400 block text-[11px]">Masa Durumu</span>
-            <span className="text-sm font-bold text-amber-400 mt-0.5 block">
-              {emptyTables.length} Boş / {fullTables.length} Dolu
+            <span className="text-neutral-400 block text-[11px]">Canlı Masa Durumu</span>
+            <span className="text-sm font-bold text-white mt-0.5 block">
+              <span className="text-emerald-400">{emptyTables.length} Müsait</span> / <span className="text-red-400">{fullTables.length} Dolu</span>
             </span>
           </div>
         </div>
@@ -534,6 +575,8 @@ export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {salon.tables.map(table => {
               const isOccupied = table.status === 'DOLU';
+              const isMaintenance = table.status === 'BAKIMDA' || table.status === 'KULLANIM_DISI';
+              const tableHourlyRate = table.hourlyRate || salon.hourlyRate || 300;
 
               return (
                 <div
@@ -541,6 +584,8 @@ export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
                   className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
                     isOccupied
                       ? 'bg-neutral-900/90 border-red-500/30 shadow-md'
+                      : isMaintenance
+                      ? 'bg-neutral-900/80 border-amber-500/30'
                       : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700'
                   }`}
                 >
@@ -550,28 +595,39 @@ export const SalonDetailView: React.FC<SalonDetailViewProps> = ({
                         <span className="font-extrabold text-base text-white">
                           Masa {table.tableNumber}
                         </span>
-                        <span
-                          className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                            isOccupied
-                              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          }`}
-                        >
-                          {isOccupied ? 'DOLU' : 'BOŞ'}
-                        </span>
+                        {isOccupied ? (
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                            Dolu
+                          </span>
+                        ) : isMaintenance ? (
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            Kullanım Dışı
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            Müsait
+                          </span>
+                        )}
                       </div>
                       <span className="text-xs text-neutral-400 mt-0.5 block">
                         {table.name}
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => onOpenTableQr(table.tableNumber, table.allowedGames)}
-                      className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors"
-                      title="Masa QR Kodunu Gör"
-                    >
-                      <QrCode className="w-4 h-4 text-amber-400" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-400 bg-neutral-950 px-2 py-1 rounded-lg border border-neutral-800">
+                        {tableHourlyRate} ₺/sa
+                      </span>
+                      <button
+                        onClick={() => onOpenTableQr(table.tableNumber, table.allowedGames)}
+                        className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors"
+                        title="Masa QR Kodunu Gör"
+                      >
+                        <QrCode className="w-4 h-4 text-amber-400" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800/80 text-xs">

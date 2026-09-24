@@ -78,13 +78,16 @@ export interface User {
   };
 }
 
+export type TableStatus = 'BOS' | 'DOLU' | 'BAKIMDA' | 'MUSAIT' | 'KULLANIM_DISI';
+
 export interface SalonTable {
   id: string;
   salonId: string;
   tableNumber: number;
   name: string; // Örn: Masa 1 (3 Bant)
   allowedGames: BilliardGameType[];
-  status: 'BOS' | 'DOLU' | 'BAKIMDA';
+  status: 'BOS' | 'DOLU' | 'BAKIMDA' | 'MUSAIT' | 'KULLANIM_DISI';
+  hourlyRate?: number; // Opsiyonel masa bazlı saat ücreti
   currentMatchId?: string;
   activePlayerIds?: string[];
   activePlayerNames?: string[];
@@ -93,7 +96,6 @@ export interface SalonTable {
   qrCode: string; // Unique salon-table QR identifier
 }
 
-export type TableStatus = 'BOS' | 'DOLU' | 'BAKIMDA';
 export type CafeMenuItem = SalonMenuItem;
 export type Advertisement = AdSponsorship;
 export type SalonStatus = 'ONAYLANDI' | 'BEKLEMEDE' | 'EK_BELGE_GEREKLI' | 'REDDEDILDI' | 'AKTIF' | 'PASIF';
@@ -107,6 +109,7 @@ export interface Salon {
   phone: string;
   isOpen: boolean;
   openHours: string; // Örn: "11:00 - 02:00"
+  hourlyRate?: number; // Masa başı saatlik ücret (TL/saat)
   coverImage: string;
   photos: string[];
   rating: number;
@@ -311,7 +314,7 @@ export interface SalonOrder {
   totalAmount?: number;
   orderNote?: string;
   note?: string;
-  status: 'ALINDI' | 'HAZIRLANIYOR' | 'SERVIS_EDILDI' | 'KASADA_ODENDI_KAPATILDI' | 'TESLIM_EDILDI';
+  status: 'SIPARIS_EDILDI' | 'ALINDI' | 'HAZIRLANIYOR' | 'SERVIS_EDILDI' | 'KASADA_ODENDI_KAPATILDI' | 'TESLIM_EDILDI' | 'IPTAL';
   createdAt: string;
 }
 

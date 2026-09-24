@@ -9,15 +9,17 @@ import {
   User as UserIcon,
   Store,
   Shield,
+  BookOpen,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CITIES } from '../../data/mockData';
 
 interface NavbarProps {
   onOpenQrScanner?: () => void;
+  onOpenDocs?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = () => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenQrScanner, onOpenDocs }) => {
   const {
     currentUser,
     selectedCity,
@@ -105,7 +107,46 @@ export const Navbar: React.FC<NavbarProps> = () => {
         </div>
 
         {/* Right Action Icons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* BilardoGo Nedir Döküman butonu */}
+          {onOpenDocs && (
+            <button
+              onClick={onOpenDocs}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-500/50 text-neutral-300 hover:text-amber-400 text-xs font-semibold transition-colors"
+              title="BilardoGo Nedir? Salon ve Sistem Dökümantasyonu"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>BilardoGo Nedir?</span>
+            </button>
+          )}
+
+          {/* Salon Portali Hızlı Buton */}
+          <button
+            onClick={() => {
+              setActiveView('business_auth');
+              window.location.hash = 'salon';
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all shadow-sm"
+            title="Salon İşletme Girişi & Kaydı (/salon)"
+          >
+            <Store className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Salon Portali</span>
+            <span className="sm:hidden text-[10px]">Salon</span>
+          </button>
+
+          {/* Admin Portali Hızlı Buton */}
+          <button
+            onClick={() => {
+              setActiveView('admin_auth');
+              window.location.hash = 'admin';
+            }}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all shadow-sm"
+            title="Süper Admin Girişi & Kaydı (/admin)"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>Admin</span>
+          </button>
+
           {/* Active match indicator if exists */}
           {activeMatch && (
             <button
@@ -218,43 +259,57 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
                   <button
                     onClick={() => {
-                      setCurrentRole('isletme');
-                      setActiveView('business_dashboard');
+                      setActiveView('business_auth');
+                      window.location.hash = 'salon';
                       setShowUserMenu(false);
                     }}
                     className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"
                   >
                     <div className="flex items-center gap-2.5">
                       <Store className="w-4 h-4 text-amber-500" />
-                      <span>Salon İşletme Paneli</span>
+                      <span>Salon Girişi & Kaydı</span>
                     </div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-semibold group-hover:bg-amber-500/20">
-                      Giriş
+                      İşletme
                     </span>
                   </button>
 
                   <button
                     onClick={() => {
-                      setCurrentRole('admin');
-                      setActiveView('admin_dashboard');
+                      setActiveView('admin_auth');
+                      window.location.hash = 'admin';
                       setShowUserMenu(false);
                     }}
                     className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center justify-between transition-colors group"
                   >
                     <div className="flex items-center gap-2.5">
                       <Shield className="w-4 h-4 text-red-400" />
-                      <span>Süper Admin Paneli</span>
+                      <span>Süper Admin Girişi & Kaydı</span>
                     </div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-semibold group-hover:bg-red-500/20">
-                      Yetkili
+                      Yönetici
                     </span>
                   </button>
+
+                  {onOpenDocs && (
+                    <button
+                      onClick={() => {
+                        onOpenDocs();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-200 hover:bg-neutral-800 flex items-center gap-2.5 transition-colors"
+                    >
+                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <span>BilardoGo Nedir? (Doküman)</span>
+                    </button>
+                  )}
 
                   <div className="pt-1 border-t border-neutral-800/80">
                     <button
                       onClick={() => {
                         setCurrentRole('kullanici');
                         setActiveView('home');
+                        window.location.hash = '';
                         setShowUserMenu(false);
                       }}
                       className="w-full text-left px-3 py-2 rounded-xl text-xs text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2.5 transition-colors"

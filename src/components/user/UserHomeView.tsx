@@ -21,6 +21,14 @@ interface UserHomeViewProps {
   onOpenQrScanner: () => void;
 }
 
+const getInitials = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toLocaleUpperCase('tr-TR');
+  }
+  return (parts[0]?.slice(0, 2) || '').toLocaleUpperCase('tr-TR');
+};
+
 export const UserHomeView: React.FC<UserHomeViewProps> = ({ onSelectSalon, onOpenQrScanner }) => {
   const {
     currentUser,
@@ -238,13 +246,45 @@ export const UserHomeView: React.FC<UserHomeViewProps> = ({ onSelectSalon, onOpe
                   
                   {/* Top Badges */}
                   <div className="absolute top-3 inset-x-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>{playersInThisSalon.length} Aktif Kişi</span>
-                    </div>
+                    {playersInThisSalon.length > 0 ? (
+                      <div
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/85 backdrop-blur-md border border-white/15 text-xs shadow-md"
+                        title={`Salondaki Aktif Oyuncular: ${playersInThisSalon.map(p => p.name).join(', ')}`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 ml-0.5" />
+                        <div className="flex items-center -space-x-1.5">
+                          {playersInThisSalon.slice(0, 3).map(p => (
+                            <div
+                              key={p.id}
+                              title={p.name}
+                              className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-neutral-950 font-black text-[9px] flex items-center justify-center border-2 border-neutral-950 shadow-sm"
+                            >
+                              {getInitials(p.name)}
+                            </div>
+                          ))}
+                          {/* Yuvarlak içinde ... rozeti */}
+                          <div
+                            title={`Ve diğer aktif oyuncular`}
+                            className="w-6 h-6 rounded-full bg-neutral-800 text-amber-400 font-black text-[10px] flex items-center justify-center border-2 border-neutral-950 tracking-tighter"
+                          >
+                            ...
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/10 text-[11px] font-medium text-neutral-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <span>Müsait Masalar</span>
+                      </div>
+                    )}
 
-                    <div className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs font-bold text-amber-400">
-                      ★ {salon.rating}
+                    <div className="flex items-center gap-1.5">
+                      <div className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/10 text-xs font-bold text-amber-400">
+                        ★ {salon.rating}
+                      </div>
+                      <div className="px-2.5 py-1 rounded-full bg-amber-500 text-neutral-950 text-xs font-extrabold shadow-sm">
+                        {salon.hourlyRate || 300} ₺/sa
+                      </div>
                     </div>
                   </div>
 
@@ -274,7 +314,7 @@ export const UserHomeView: React.FC<UserHomeViewProps> = ({ onSelectSalon, onOpe
                     <div className="mt-3 flex items-center gap-3 text-xs text-neutral-300">
                       <div className="flex items-center gap-1.5">
                         <CircleDot className="w-3.5 h-3.5 text-amber-400" />
-                        <span>{salon.tables.length} Masa ({occupiedTables} Dolu, {salon.tables.length - occupiedTables} Boş)</span>
+                        <span>{salon.tables.length} Masa ({occupiedTables} Dolu, {salon.tables.length - occupiedTables} Müsait)</span>
                       </div>
                     </div>
                   </div>

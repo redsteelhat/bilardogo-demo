@@ -20,11 +20,14 @@ import {
   HeadToHeadRecord,
   SoloPracticeRecord,
   WeekendEvent,
+  TableStatus,
+  SalonMenuItem,
 } from '../types';
 import {
   CITIES,
   INITIAL_USERS,
   INITIAL_SALONS,
+  INITIAL_SALON_MENU,
   INITIAL_MATCHES,
   INITIAL_TOURNAMENTS,
   INITIAL_ORDERS,
@@ -96,10 +99,19 @@ interface AppContextType {
   // Business Panel Actions
   activeSalon: Salon | undefined;
   updateSalonDetails: (updated: Partial<Salon>) => void;
+  updateSalonProfile: (salonId: string, updated: Partial<Salon>) => void;
+  registerNewSalon: (salonData: Partial<Salon>) => Salon;
+  updateSalonHourlyRate: (salonId: string, hourlyRate: number) => void;
   addTableToSalon: (name: string, allowedGames: BilliardGameType[]) => void;
+  addSalonTableFull: (salonId: string, tableData: { tableNumber?: number; name: string; allowedGames: BilliardGameType[]; status?: TableStatus; hourlyRate?: number }) => void;
+  updateSalonTable: (salonId: string, tableId: string, updated: Partial<SalonTable>) => void;
+  deleteSalonTable: (salonId: string, tableId: string) => void;
   removeTableFromSalon: (tableId: string) => void;
-  toggleTableStatus: (tableId: string, status: 'BOS' | 'DOLU' | 'BAKIMDA') => void;
-  updateTableStatus: (salonId: string, tableId: string, status: 'BOS' | 'DOLU' | 'BAKIMDA', playerNames?: string[]) => void;
+  toggleTableStatus: (tableId: string, status: TableStatus) => void;
+  updateTableStatus: (salonId: string, tableId: string, status: TableStatus, playerNames?: string[]) => void;
+  addMenuItem: (salonId: string, item: Omit<SalonMenuItem, 'id'>) => void;
+  updateMenuItem: (salonId: string, itemId: string, updated: Partial<SalonMenuItem>) => void;
+  deleteMenuItem: (salonId: string, itemId: string) => void;
   toggleMenuItemAvailability: (menuItemId: string) => void;
   addSalonAnnouncement: (title: string, content: string, type: 'INDIRIM' | 'HABER' | 'ETKINLIK', validUntil: string) => void;
   addAnnouncement: (salonId: string, ann: any) => void;
@@ -925,11 +937,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...order,
       id: `ord-${Date.now().toString().slice(-4)}`,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'ALINDI',
+      status: 'SIPARIS_EDILDI',
     };
 
     setOrders(prev => [newOrder, ...prev]);
-    showToast('Siparişiniz salona iletildi! Ücret kasada ödenecektir.');
+    showToast('Siparişiniz salona iletildi! Durumu: Sipariş Edildi.');
     return newOrder;
   };
 
@@ -937,7 +949,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders(prev =>
       prev.map(o => (o.id === orderId ? { ...o, status } : o))
     );
-    showToast(`Sipariş durumu: ${status === 'KASADA_ODENDI_KAPATILDI' ? 'Ödendi ve Kapatıldı' : status}`);
+    const labelMap: Record<string, string> = {
+      SIPARIS_EDILDI: 'Sipariş Edildi',
+      ALINDI: 'Alındı',
+      HAZIRLANIYOR: 'Hazırlanıyor',
+      SERVIS_EDILDI: 'Servis Edildi',
+      TESLIM_EDILDI: 'Teslim Edildi',
+      KASADA_ODENDI_KAPATILDI: 'Ödendi ve Kapatıldı',
+      IPTAL: 'İptal Edildi',
+    };
+    showToast(`Sipariş durumu: ${labelMap[status] || status}`);
   };
 
   // Chat message
@@ -1001,61 +1022,200 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Salon bilgileri güncellendi.');
   };
 
-  const addTableToSalon = (name: string, allowedGames: BilliardGameType[]) => {
-    if (!activeSalon) return;
-    const nextTableNum = activeSalon.tables.length + 1;
-    const newTbl: SalonTable = {
-      id: `tbl-${activeSalon.id}-${nextTableNum}`,
-      salonId: activeSalon.id,
-      tableNumber: nextTableNum,
-      name: name || `Masa ${nextTableNum}`,
-      allowedGames,
-      status: 'BOS',
-      qrCode: `BILARDOGO://SALON/${activeSalon.id}/TABLE/${nextTableNum}`,
+  const updateSalonProfile = (salonId: string, updated: Partial<Salon>) => {
+    setSalons(prev =>
+      prev.map(s => (s.id === salonId ? { ...s, ...updated } : s))
+    );
+    showToast('Salon profili başarıyla güncellendi.');
+  };
+
+  const registerNewSalon = (salonData: Partial<Salon>): Salon => {
+    const newId = `salon-${Date.now().toString().slice(-6)}`;
+    const newSalon: Salon = {
+      id: newId,
+      name: salonData.name || 'Yeni Bilardo Salonu',
+      city: salonData.city || selectedCity || 'İstanbul',
+      district: salonData.district || 'Merkez',
+      address: salonData.address || '',
+      phone: salonData.phone || '',
+      isOpen: true,
+      openHours: salonData.openHours || '10:00 - 02:00',
+      hourlyRate: salonData.hourlyRate || 250,
+      coverImage: salonData.coverImage || 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=1200&q=80',
+      photos: [
+        'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1544919982-b61976f0ba43?auto=format&fit=crop&w=800&q=80',
+      ],
+      rating: 5.0,
+      followersCount: 1,
+      description: salonData.description || 'Modern ve kaliteli bilardo salonu.',
+      taxNumber: salonData.taxNumber || '',
+      verificationStatus: 'BEKLEMEDE',
+      status: 'AKTIF',
+      amenities: salonData.amenities || ['Simonis 300 Çuha', 'Isıtmalı 3 Bant Masalar', 'Kafeterya', 'Klimalı', 'Wi-Fi'],
+      announcements: [],
+      menuItems: INITIAL_SALON_MENU,
+      cafeMenu: INITIAL_SALON_MENU,
+      tables: Array.from({ length: 6 }).map((_, idx) => ({
+        id: `tbl-${newId}-${idx + 1}`,
+        salonId: newId,
+        tableNumber: idx + 1,
+        name: `Masa ${idx + 1} (${idx < 4 ? '3 Bant' : 'Amerikan'})`,
+        allowedGames: idx < 4 ? ['3_BANT', 'KARAMBOL'] : ['AMERIKAN', 'DOKUZ_TOP'],
+        status: 'BOS' as TableStatus,
+        hourlyRate: salonData.hourlyRate || 250,
+        qrCode: `BILARDOGO://SALON/${newId}/TABLE/${idx + 1}`,
+      })),
     };
 
+    setSalons(prev => [newSalon, ...prev]);
+    setSelectedSalonId(newId);
+    showToast(`"${newSalon.name}" salonu başarıyla kaydedildi!`);
+    return newSalon;
+  };
+
+  const updateSalonHourlyRate = (salonId: string, hourlyRate: number) => {
     setSalons(prev =>
-      prev.map(s =>
-        s.id === activeSalon.id ? { ...s, tables: [...s.tables, newTbl] } : s
-      )
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        return {
+          ...s,
+          hourlyRate,
+          tables: s.tables.map(t => ({ ...t, hourlyRate: t.hourlyRate || hourlyRate })),
+        };
+      })
     );
-    showToast(`Masa ${nextTableNum} başarıyla eklendi.`);
+    showToast(`Saatlik masa ücreti ${hourlyRate} ₺ olarak güncellendi.`);
+  };
+
+  const addTableToSalon = (name: string, allowedGames: BilliardGameType[]) => {
+    if (!activeSalon) return;
+    addSalonTableFull(activeSalon.id, {
+      name,
+      allowedGames,
+      status: 'BOS',
+      hourlyRate: activeSalon.hourlyRate || 250,
+    });
+  };
+
+  const addSalonTableFull = (
+    salonId: string,
+    tableData: {
+      tableNumber?: number;
+      name: string;
+      allowedGames: BilliardGameType[];
+      status?: TableStatus;
+      hourlyRate?: number;
+    }
+  ) => {
+    setSalons(prev =>
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        const existingNumbers = s.tables.map(t => t.tableNumber);
+        const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+        const nextNum = tableData.tableNumber || (maxNum + 1);
+        const newTbl: SalonTable = {
+          id: `tbl-${salonId}-${nextNum}-${Date.now().toString().slice(-4)}`,
+          salonId,
+          tableNumber: nextNum,
+          name: tableData.name || `Masa ${nextNum}`,
+          allowedGames: tableData.allowedGames.length > 0 ? tableData.allowedGames : ['3_BANT', 'KARAMBOL'],
+          status: tableData.status || 'BOS',
+          hourlyRate: tableData.hourlyRate || s.hourlyRate || 250,
+          qrCode: `BILARDOGO://SALON/${salonId}/TABLE/${nextNum}`,
+        };
+        return {
+          ...s,
+          tables: [...s.tables, newTbl],
+        };
+      })
+    );
+    showToast(`Masa eklendi.`);
+  };
+
+  const updateSalonTable = (salonId: string, tableId: string, updated: Partial<SalonTable>) => {
+    setSalons(prev =>
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        return {
+          ...s,
+          tables: s.tables.map(t => (t.id === tableId ? { ...t, ...updated } : t)),
+        };
+      })
+    );
+    showToast('Masa güncellendi.');
+  };
+
+  const deleteSalonTable = (salonId: string, tableId: string) => {
+    setSalons(prev =>
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        return {
+          ...s,
+          tables: s.tables.filter(t => t.id !== tableId),
+        };
+      })
+    );
+    showToast('Masa silindi.');
   };
 
   const removeTableFromSalon = (tableId: string) => {
     if (!activeSalon) return;
-    setSalons(prev =>
-      prev.map(s =>
-        s.id === activeSalon.id
-          ? { ...s, tables: s.tables.filter(t => t.id !== tableId) }
-          : s
-      )
-    );
-    showToast('Masa kaldırıldı.');
+    deleteSalonTable(activeSalon.id, tableId);
   };
 
-  const toggleTableStatus = (tableId: string, status: 'BOS' | 'DOLU' | 'BAKIMDA') => {
+  const toggleTableStatus = (tableId: string, status: TableStatus) => {
     if (!activeSalon) return;
+    updateTableStatus(activeSalon.id, tableId, status);
+  };
+
+  const addMenuItem = (salonId: string, item: Omit<SalonMenuItem, 'id'>) => {
+    const newItem: SalonMenuItem = {
+      ...item,
+      id: `menu-${Date.now()}`,
+    };
     setSalons(prev =>
-      prev.map(s =>
-        s.id === activeSalon.id
-          ? {
-              ...s,
-              tables: s.tables.map(t =>
-                t.id === tableId
-                  ? {
-                      ...t,
-                      status,
-                      currentMatchId: status === 'BOS' ? undefined : t.currentMatchId,
-                      activePlayerNames: status === 'BOS' ? [] : t.activePlayerNames,
-                    }
-                  : t
-              ),
-            }
-          : s
-      )
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        const currentMenu = s.menuItems || [];
+        return {
+          ...s,
+          menuItems: [...currentMenu, newItem],
+          cafeMenu: [...currentMenu, newItem],
+        };
+      })
     );
-    showToast(`Masa durumu: ${status}`);
+    showToast(`"${newItem.name}" menüye eklendi (${newItem.price} ₺).`);
+  };
+
+  const updateMenuItem = (salonId: string, itemId: string, updated: Partial<SalonMenuItem>) => {
+    setSalons(prev =>
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        const updatedList = (s.menuItems || []).map(m => (m.id === itemId ? { ...m, ...updated } : m));
+        return {
+          ...s,
+          menuItems: updatedList,
+          cafeMenu: updatedList,
+        };
+      })
+    );
+    showToast('Menü ürünü güncellendi.');
+  };
+
+  const deleteMenuItem = (salonId: string, itemId: string) => {
+    setSalons(prev =>
+      prev.map(s => {
+        if (s.id !== salonId) return s;
+        const filtered = (s.menuItems || []).filter(m => m.id !== itemId);
+        return {
+          ...s,
+          menuItems: filtered,
+          cafeMenu: filtered,
+        };
+      })
+    );
+    showToast('Ürün menüden kaldırıldı.');
   };
 
   const toggleMenuItemAvailability = (menuItemId: string) => {
@@ -1213,7 +1373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const currentSalonId = selectedSalonId;
   const cafeOrders = orders;
 
-  const updateTableStatus = (salonId: string, tableId: string, status: 'BOS' | 'DOLU' | 'BAKIMDA', playerNames?: string[]) => {
+  const updateTableStatus = (salonId: string, tableId: string, status: TableStatus, playerNames?: string[]) => {
     setSalons(prev =>
       prev.map(s => {
         if (s.id !== salonId) return s;
@@ -1221,17 +1381,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...s,
           tables: s.tables.map(t => {
             if (t.id !== tableId) return t;
+            const isOcc = status === 'DOLU';
+            const isAvail = status === 'BOS' || status === 'MUSAIT';
             return {
               ...t,
               status,
-              activePlayerNames: status === 'DOLU' ? (playerNames || ['Misafir 1', 'Misafir 2']) : undefined,
-              elapsedMinutes: status === 'DOLU' ? (t.elapsedMinutes || 25) : 0,
+              activePlayerNames: isOcc ? (playerNames || t.activePlayerNames || ['Müşteri 1', 'Müşteri 2']) : isAvail ? [] : undefined,
+              elapsedMinutes: isOcc ? (t.elapsedMinutes || 25) : 0,
             };
           }),
         };
       })
     );
-    showToast(`Masa durumu güncellendi: ${status}`);
+    const label = (status === 'BOS' || status === 'MUSAIT') ? 'Müsait' : status === 'DOLU' ? 'Dolu' : 'Kullanım Dışı';
+    showToast(`Masa durumu güncellendi: ${label}`);
   };
 
   const updateCafeOrderStatus = (orderId: string, status: any) => {
@@ -1337,10 +1500,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         reportUserOrMessage,
         activeSalon,
         updateSalonDetails,
+        updateSalonProfile,
+        registerNewSalon,
+        updateSalonHourlyRate,
         addTableToSalon,
+        addSalonTableFull,
+        updateSalonTable,
+        deleteSalonTable,
         removeTableFromSalon,
         toggleTableStatus,
         updateTableStatus,
+        addMenuItem,
+        updateMenuItem,
+        deleteMenuItem,
         toggleMenuItemAvailability,
         addSalonAnnouncement,
         addAnnouncement,

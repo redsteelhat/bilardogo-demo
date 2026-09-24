@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
@@ -11,6 +11,9 @@ import { EventsBulletinView } from './components/user/EventsBulletinView';
 import { OrderFoodView } from './components/user/OrderFoodView';
 import { BusinessDashboardView } from './components/business/BusinessDashboardView';
 import { AdminDashboardView } from './components/admin/AdminDashboardView';
+import { AdminAuthView } from './components/auth/AdminAuthView';
+import { BusinessAuthView } from './components/auth/BusinessAuthView';
+import { TechDocsModal } from './components/common/TechDocsModal';
 import { MatchRequestModal } from './components/user/MatchRequestModal';
 import { QrModal } from './components/common/QrModal';
 import { User, BilliardGameType } from './types';
@@ -19,6 +22,7 @@ const AppContent: React.FC = () => {
   const {
     activeView,
     setActiveView,
+    currentRole,
     selectedSalonId,
     setSelectedSalonId,
     salons,
@@ -29,6 +33,7 @@ const AppContent: React.FC = () => {
   // Modal States
   const [matchModalUser, setMatchModalUser] = useState<User | null>(null);
   const [matchModalGameType, setMatchModalGameType] = useState<BilliardGameType>('3_BANT');
+  const [showDocsModal, setShowDocsModal] = useState(false);
   
   const [qrModalConfig, setQrModalConfig] = useState<{
     isOpen: boolean;
@@ -43,6 +48,38 @@ const AppContent: React.FC = () => {
     tableNumber: 1,
     allowedGames: ['3_BANT', 'KARAMBOL'],
   });
+
+  // URL Hash & Path routing synchronization
+  useEffect(() => {
+    const handleUrlRouting = () => {
+      const hash = window.location.hash.toLowerCase().replace('#', '');
+      const path = window.location.pathname.toLowerCase();
+
+      if (hash === 'admin' || path === '/admin') {
+        if (currentRole === 'admin') {
+          setActiveView('admin_dashboard');
+        } else {
+          setActiveView('admin_auth');
+        }
+      } else if (hash === 'salon' || hash === 'isletme' || path === '/salon' || path === '/isletme') {
+        if (currentRole === 'isletme') {
+          setActiveView('business_dashboard');
+        } else {
+          setActiveView('business_auth');
+        }
+      } else if (hash === 'belge' || hash === 'docs') {
+        setShowDocsModal(true);
+      }
+    };
+
+    handleUrlRouting();
+    window.addEventListener('hashchange', handleUrlRouting);
+    window.addEventListener('popstate', handleUrlRouting);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlRouting);
+      window.removeEventListener('popstate', handleUrlRouting);
+    };
+  }, [currentRole, setActiveView]);
 
   const handleOpenMatchModal = (targetUser: User, preferredGame: BilliardGameType = '3_BANT') => {
     setMatchModalUser(targetUser);
@@ -75,6 +112,7 @@ const AppContent: React.FC = () => {
       {/* Top Navbar */}
       <Navbar
         onOpenQrScanner={handleOpenScanner}
+        onOpenDocs={() => setShowDocsModal(true)}
       />
 
       {/* Main Dynamic View Content */}
@@ -99,6 +137,12 @@ const AppContent: React.FC = () => {
           />
         )}
 
+        {/* Dedicated Admin Portal Routes */}
+        {activeView === 'admin_auth' && <AdminAuthView />}
+
+        {/* Dedicated Salon / Business Portal Routes */}
+        {activeView === 'business_auth' && <BusinessAuthView />}
+
         {activeView === 'bulletin' && <EventsBulletinView />}
 
         {activeView === 'active_match' && (
@@ -116,16 +160,35 @@ const AppContent: React.FC = () => {
 
         {activeView === 'business_dashboard' && (
           <div className="space-y-2">
-            <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs text-amber-400 max-w-7xl mx-auto">
-              <span className="font-bold flex items-center gap-1.5">
-                🏢 Salon İşletme Paneli
-              </span>
-              <button
-                onClick={() => setActiveView('home')}
-                className="px-3 py-1 rounded-lg bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors shadow-sm"
-              >
-                ← Oyuncu Arayüzüne Dön
-              </button>
+            <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between text-xs text-amber-400 max-w-7xl mx-auto">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold flex items-center gap-1.5">
+                  🏢 Salon İşletme Paneli
+                </span>
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
+                  Rota: /salon
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setActiveView('business_auth');
+                    window.location.hash = 'salon';
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-700 transition-colors"
+                >
+                  Hesap Değiştir
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveView('home');
+                    window.location.hash = '';
+                  }}
+                  className="px-3 py-1 rounded-lg bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors shadow-sm"
+                >
+                  ← Oyuncu Arayüzüne Dön
+                </button>
+              </div>
             </div>
             <BusinessDashboardView onOpenTableQr={handleOpenTableQr} />
           </div>
@@ -133,18 +196,37 @@ const AppContent: React.FC = () => {
 
         {activeView === 'admin_dashboard' && (
           <div className="space-y-2">
-            <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2 flex items-center justify-between text-xs text-red-400 max-w-7xl mx-auto">
-              <span className="font-bold flex items-center gap-1.5">
-                🛡️ Süper Admin Paneli
-              </span>
-              <button
-                onClick={() => setActiveView('home')}
-                className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold hover:bg-red-400 transition-colors shadow-sm"
-              >
-                ← Oyuncu Arayüzüne Dön
-              </button>
+            <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2.5 flex items-center justify-between text-xs text-red-400 max-w-7xl mx-auto">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold flex items-center gap-1.5">
+                  🛡️ Süper Admin Paneli
+                </span>
+                <span className="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full border border-red-500/30">
+                  Rota: /admin
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setActiveView('admin_auth');
+                    window.location.hash = 'admin';
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-700 transition-colors"
+                >
+                  Hesap Değiştir
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveView('home');
+                    window.location.hash = '';
+                  }}
+                  className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold hover:bg-red-400 transition-colors shadow-sm"
+                >
+                  ← Oyuncu Arayüzüne Dön
+                </button>
+              </div>
             </div>
-            <AdminDashboardView onOpenDocs={() => {}} />
+            <AdminDashboardView onOpenDocs={() => setShowDocsModal(true)} />
           </div>
         )}
       </main>
@@ -152,7 +234,7 @@ const AppContent: React.FC = () => {
       {/* Mobile Floating Bottom Bar */}
       <BottomNav
         onOpenQrScanner={handleOpenScanner}
-        onOpenDocs={() => {}}
+        onOpenDocs={() => setShowDocsModal(true)}
       />
 
       {/* Match Request Modal */}
@@ -164,6 +246,12 @@ const AppContent: React.FC = () => {
           initialGameType={matchModalGameType}
         />
       )}
+
+      {/* Tech Docs / BilardoGo Nedir? Modal */}
+      <TechDocsModal
+        isOpen={showDocsModal}
+        onClose={() => setShowDocsModal(false)}
+      />
 
       {/* QR Code Scanner / Generator Modal */}
       <QrModal
