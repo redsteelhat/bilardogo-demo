@@ -2,7 +2,9 @@
   "name": "bilardogo",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=20.11" },
+  "engines": {
+    "node": ">=20.11"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter=@bilardogo/web",
@@ -14,7 +16,7 @@
     "db:generate": "pnpm --filter @bilardogo/db generate",
     "db:migrate": "pnpm --filter @bilardogo/db migrate",
     "db:seed": "pnpm --filter @bilardogo/db seed",
-    "db:seed:demo": "pnpm --filter @bilardogo/db seed:demo",
+    "db:seed:demo": "pnpm --filter @bilardogo/api seed:demo",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,css}\" --ignore-path .gitignore"
   },
   "devDependencies": {
@@ -23,6 +25,11 @@
     "typescript": "5.9.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp", "@tailwindcss/oxide", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "@tailwindcss/oxide",
+      "unrs-resolver"
+    ]
   }
 }

@@ -1,0 +1,46 @@
+{
+  "name": "@bilardogo/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@bilardogo/api": "workspace:*",
+    "@bilardogo/db": "workspace:*",
+    "@bilardogo/domain": "workspace:*",
+    "@bilardogo/ui": "workspace:*",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
+    "@tanstack/react-query": "^5.104.0",
+    "@trpc/client": "^11.19.0",
+    "@trpc/react-query": "^11.19.0",
+    "@trpc/server": "^11.19.0",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^1.48.0",
+    "next": "15.5.26",
+    "qr-scanner": "^1.4.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.6",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@bilardogo/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "15.5.26",
+    "tailwindcss": "^4.3.3",
+    "typescript": "5.9.3",
+    "@eslint/eslintrc": "^3.3.1"
+  }
+}
