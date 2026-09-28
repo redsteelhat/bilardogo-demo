@@ -1,0 +1,32 @@
+{
+  "name": "@bilardogo/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "seed:demo": "tsx src/seed-demo.ts",
+    "studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@bilardogo/domain": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@bilardogo/config": "workspace:*",
+    "@types/node": "^22.18.0",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.21.0",
+    "typescript": "5.9.3"
+  }
+}

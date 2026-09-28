@@ -1,0 +1,33 @@
+{
+  "name": "@bilardogo/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bilardogo/db": "workspace:*",
+    "@bilardogo/domain": "workspace:*",
+    "@supabase/supabase-js": "^2.117.2",
+    "@trpc/server": "^11.19.0",
+    "qrcode": "^1.5.4",
+    "superjson": "^2.2.6",
+    "web-push": "^3.6.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@bilardogo/config": "workspace:*",
+    "@types/node": "^22.18.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/web-push": "^3.6.4",
+    "postgres": "^3.4.9",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
