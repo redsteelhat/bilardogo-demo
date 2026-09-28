@@ -587,7 +587,7 @@ export const businessRouter = router({
     .mutation(async ({ ctx, input }) => {
       const [vp] = await ctx.db.select().from(venueProducts).where(eq(venueProducts.id, input.venueProductId));
       if (!vp) notFound('Ürün');
-      await requireVenueAccess(ctx.db, ctx.profile.id, vp.venueId, 'orders');
+      await requireVenueAccess(ctx.db, ctx.profile.id, vp.venueId, 'orders', { allowUnapproved: true });
       await ctx.db
         .update(venueProducts)
         .set({ isAvailable: input.isAvailable, ...(input.stock !== undefined ? { stock: input.stock } : {}) })
@@ -685,7 +685,7 @@ export const businessRouter = router({
   }),
 
   postImageUpload: protectedProcedure.input(uploadRequestSchema.extend({ venueId: uid })).mutation(async ({ ctx, input }) => {
-    await requireVenueAccess(ctx.db, ctx.profile.id, input.venueId, 'posts');
+    await requireVenueAccess(ctx.db, ctx.profile.id, input.venueId, 'posts', { allowUnapproved: true });
     const { path } = buildUploadPath(`venues/${input.venueId}/posts`, input, 'image');
     return ctx.services.storage.createSignedUpload('public-media', path);
   }),

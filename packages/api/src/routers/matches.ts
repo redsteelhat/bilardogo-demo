@@ -156,7 +156,7 @@ async function hydrateMatches(ctx: { db: DbOrTx; services: { storage: { publicUr
       .from(venues)
       .where(inArray(venues.id, [...new Set(rows.map((r) => r.venueId))])),
     ctx.db
-      .select({ id: venueTables.id, number: venueTables.number, label: venueTables.label })
+      .select({ id: venueTables.id, number: venueTables.number, label: venueTables.label, allowedGameTypes: venueTables.allowedGameTypes })
       .from(venueTables)
       .where(inArray(venueTables.id, rows.map((r) => r.tableId).filter((x): x is string => !!x))),
   ]);

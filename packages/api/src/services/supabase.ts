@@ -24,15 +24,25 @@ export function supabaseStorage(): StorageService {
       return { path: data.path, token: data.token, signedUrl: data.signedUrl };
     },
     async createSignedRead(bucket, path, expiresInSec = 3600) {
-      const { data } = await getSupabaseAdmin().storage.from(bucket).createSignedUrl(path, expiresInSec);
-      return data?.signedUrl ?? null;
+      try {
+        const { data } = await getSupabaseAdmin().storage.from(bucket).createSignedUrl(path, expiresInSec);
+        return data?.signedUrl ?? null;
+      } catch (err) {
+        console.warn('[storage] imzalı bağlantı üretilemedi', err);
+        return null;
+      }
     },
     async createSignedReads(bucket, paths, expiresInSec = 3600) {
       if (paths.length === 0) return {};
-      const { data } = await getSupabaseAdmin().storage.from(bucket).createSignedUrls(paths, expiresInSec);
-      const out: Record<string, string> = {};
-      for (const d of data ?? []) if (d.path && d.signedUrl) out[d.path] = d.signedUrl;
-      return out;
+      try {
+        const { data } = await getSupabaseAdmin().storage.from(bucket).createSignedUrls(paths, expiresInSec);
+        const out: Record<string, string> = {};
+        for (const d of data ?? []) if (d.path && d.signedUrl) out[d.path] = d.signedUrl;
+        return out;
+      } catch (err) {
+        console.warn('[storage] imzalı bağlantılar üretilemedi', err);
+        return {};
+      }
     },
     publicUrl(path: string) {
       return `${base}/storage/v1/object/public/public-media/${path.split('/').map(encodeURIComponent).join('/')}`;
@@ -52,14 +62,24 @@ export function supabaseAuthAdmin(): AuthAdminService {
     },
     async findUserIdByEmail(email) {
       // Supabase Admin API e-postaya göre doğrudan arama sunmaz; auth şemasında güvenli bir sorgu yaparız.
-      const client = getSupabaseAdmin();
+      let client: SupabaseClient;
+      try {
+        client = getSupabaseAdmin();
+      } catch {
+        return null;
+      }
       const { data, error } = await client.rpc('bg_find_user_by_email', { p_email: email });
       if (error) return null;
       return (data as string | null) ?? null;
     },
     async getEmail(userId) {
-      const { data } = await getSupabaseAdmin().auth.admin.getUserById(userId);
-      return data.user?.email ?? null;
+      try {
+        const { data } = await getSupabaseAdmin().auth.admin.getUserById(userId);
+        return data.user?.email ?? null;
+      } catch (err) {
+        console.warn('[auth] e-posta alınamadı', err);
+        return null;
+      }
     },
   };
 }

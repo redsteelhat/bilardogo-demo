@@ -26,7 +26,7 @@ export type TestEnv = {
 export function setupTestEnv(): TestEnv {
   const env = {} as TestEnv;
   const name = `bg_test_${Math.random().toString(36).slice(2, 10)}`;
-  const adminUrl = process.env.BG_TEST_ADMIN_URL ?? 'postgres://postgres@localhost:54322/postgres';
+  const adminUrl = process.env.BG_TEST_ADMIN_URL ?? process.env.TEST_DATABASE_URL ?? 'postgres://postgres@localhost:54322/postgres';
   const url = adminUrl.replace(/\/[^/]*$/, `/${name}`);
   let adminSql: postgres.Sql;
   let admin: string | null = null;

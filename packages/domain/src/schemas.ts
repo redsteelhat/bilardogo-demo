@@ -237,3 +237,12 @@ export const MEDIA_LIMITS = {
   videoTypes: ['video/mp4', 'video/quicktime', 'video/webm'],
   documentTypes: ['application/pdf', 'image/jpeg', 'image/png'],
 } as const;
+
+export const PRODUCT_CATEGORIES = ['hot_drink', 'cold_drink', 'food', 'snack', 'other'] as const;
+export const PRODUCT_CATEGORY_LABELS: Record<(typeof PRODUCT_CATEGORIES)[number], string> = {
+  hot_drink: 'Sıcak içecekler',
+  cold_drink: 'Soğuk içecekler',
+  food: 'Yiyecek',
+  snack: 'Atıştırmalık',
+  other: 'Diğer',
+};

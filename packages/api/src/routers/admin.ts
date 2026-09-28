@@ -961,7 +961,15 @@ export const adminRouter = router({
       ctx.db.select().from(subscriptionEvents).where(eq(subscriptionEvents.subscriptionId, s.id)).orderBy(desc(subscriptionEvents.createdAt)),
       s.planId ? ctx.db.select().from(plans).where(eq(plans.id, s.planId)) : Promise.resolve([]),
     ]);
-    return { subscription: s, plan: plan[0] ?? null, payments: pays.map((p) => ({ ...p, amount: Number(p.amount) })), events };
+    let subjectName: string | null = null;
+    if (s.userId) {
+      const [u] = await ctx.db.select({ fullName: profiles.fullName, username: profiles.username }).from(profiles).where(eq(profiles.id, s.userId));
+      subjectName = u ? u.fullName || `@${u.username}` : null;
+    } else if (s.businessId) {
+      const [b] = await ctx.db.select({ legalName: businesses.legalName }).from(businesses).where(eq(businesses.id, s.businessId));
+      subjectName = b?.legalName ?? null;
+    }
+    return { subscription: s, subjectName, plan: plan[0] ?? null, payments: pays.map((p) => ({ ...p, amount: Number(p.amount) })), events };
   }),
 
   /** Manuel aktivasyon: ödeme alındığında plan ve dönem belirlenir. */

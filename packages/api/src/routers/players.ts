@@ -297,6 +297,13 @@ export const playersRouter = router({
       });
   }),
 
+  /** Kullanıcı özeti (id ile). */
+  byId: protectedProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ ctx, input }) => {
+    const [row] = await ctx.db.select(userSummaryColumns).from(profiles).where(and(eq(profiles.id, input.userId), isNull(profiles.deletedAt)));
+    if (!row || (await isBlockedBetween(ctx.db, ctx.profile.id, row.id))) notFound('Oyuncu');
+    return toUserSummary(row, ctx.services.storage.publicUrl);
+  }),
+
   avatarUrl: publicProcedure.input(z.object({ path: z.string().nullable() })).query(({ ctx, input }) => {
     return resolveMediaUrl(ctx.services.storage.publicUrl, input.path);
   }),

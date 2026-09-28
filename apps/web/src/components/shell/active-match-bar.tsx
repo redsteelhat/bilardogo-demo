@@ -12,7 +12,7 @@ export function ActiveMatchBar() {
   const pathname = usePathname();
   const q = trpc.matches.current.useQuery(undefined, { enabled: !!session?.onboarded, refetchInterval: 60_000 });
   const m = q.data?.[0];
-  if (!m || pathname.startsWith('/maclarim/') || pathname.startsWith('/q/') || pathname.startsWith('/qr')) return null;
+  if (!m || pathname.startsWith('/maclarim/') || pathname.startsWith('/sosyal/') || pathname.startsWith('/q/') || pathname.startsWith('/qr')) return null;
   const opp = m.players.find((p) => p.slot !== m.mySlot)?.user;
   const label =
     m.status === 'awaiting_result'
