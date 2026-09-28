@@ -25,6 +25,7 @@ export async function getAuthUser(): Promise<{ id: string; email: string | null 
     const uid = (await cookies()).get('bg_dev_uid')?.value;
     if (uid && /^[0-9a-f-]{36}$/.test(uid)) return { id: uid, email: null };
   }
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return null;
   const supabase = await getSupabaseServer();
   const auth = supabase.auth as typeof supabase.auth & {
     getClaims?: () => Promise<{ data: { claims: { sub?: string; email?: string } } | null; error: unknown }>;

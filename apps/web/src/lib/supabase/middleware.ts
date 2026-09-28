@@ -6,6 +6,10 @@ export async function updateSession(request: NextRequest, isProtected: (path: st
   if (process.env.NODE_ENV === 'development' && process.env.BG_DEV_LOGIN === '1' && request.cookies.get('bg_dev_uid')) {
     return NextResponse.next({ request });
   }
+  // Supabase henüz yapılandırılmamışsa (ör. ilk dağıtım) istek düşmesin
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return NextResponse.next({ request });
+  }
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
@@ -17,9 +21,15 @@ export async function updateSession(request: NextRequest, isProtected: (path: st
       },
     },
   });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    ({
+      data: { user },
+    } = await supabase.auth.getUser());
+  } catch (err) {
+    console.error('[middleware] Supabase oturumu okunamadı', err);
+    return response;
+  }
 
   const path = request.nextUrl.pathname;
   if (!user && isProtected(path)) {
